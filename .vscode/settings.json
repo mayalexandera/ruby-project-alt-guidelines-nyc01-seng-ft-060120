@@ -1,0 +1,9 @@
+{
+  "editor.defaultFormatter": "rebornix.ruby",
+  "typescript.tsdk": "",
+  "rufo.exe": "rufo",
+  "rufo.useBundler": false,
+  "[ruby]": {
+    "editor.defaultFormatter": "jnbt.vscode-rufo"
+  }
+}
