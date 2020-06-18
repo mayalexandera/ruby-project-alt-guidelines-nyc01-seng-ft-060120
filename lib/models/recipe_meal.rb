@@ -10,6 +10,4 @@ class RecipeMeal < ActiveRecord::Base
   #  RecipeMeal.select{ |rec_me| recipe_ids.includes?(rec_me.recipe_id) &&
   #    meal_ids.includes?(rec_me.meal_id) }
   #end
-
-
 end
