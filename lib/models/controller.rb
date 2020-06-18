@@ -20,8 +20,9 @@ class Controller
     prompt.select ("What would you like to do?") do |menu|
       menu.choice "Create a new recipe", -> { self.create_recipe }
       menu.choice "See all my recipes", -> { self.show_recipes_by_name }
-      menu.choice "See all my recipes by meal", -> { Meal.recipe_by_meal(@user) }
       menu.choice "Update User Info", -> { self.update_username }
+      menu.choice "Exit", -> { exit }
+      #menu.choice "See all my recipes by meal", -> { Meal.recipe_by_meal(@user) }
     end
   end
 
@@ -58,9 +59,3 @@ class Controller
     self.main_menu
   end
 end
-
-#ask if they would like to add another ingredient or finished
-
-#if finished, prompt user for serving quantity, and return nutritional value for one serving
-
-#add serving to meal

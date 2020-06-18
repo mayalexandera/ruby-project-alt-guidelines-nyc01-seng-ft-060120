@@ -22,7 +22,7 @@ class Recipe < ActiveRecord::Base
     grams = gets.chomp.to_f
 
     calc_nutrients1 = nutrients1.transform_values{ |v| (v * (grams/100)).round(2) }
-    calc_ingredient1 = Ingredient.create(name: ingredient1.capitalize, recipe_id: self.id, calories: calc_nutrients1["ENERC_KCAL"], protein: calc_nutrients1["PROCNT"], fat: calc_nutrients1["FAT"], carbs: calc_nutrients1["CHOCDF"])
+    calc_ingredient1 = Ingredient.create(name: ingredient1, recipe_id: self.id, grams: grams, calories: calc_nutrients1["ENERC_KCAL"], protein: calc_nutrients1["PROCNT"], fat: calc_nutrients1["FAT"], carbs: calc_nutrients1["CHOCDF"])
  
     TTY::Prompt.new.select("what would you like to do?") do |recipe|
       recipe.choice "Add another ingredient", -> {self.add_ingredient_to_recipe}
@@ -47,14 +47,21 @@ class Recipe < ActiveRecord::Base
     totals["protein"] = self.ingredients.sum{ |ing| ing.protein}
     totals["carbs"] = self.ingredients.sum{ |ing| ing.carbs}
     totals["fat"] = self.ingredients.sum{ |ing| ing.fat}
+    totals["grams"] = self.ingredients.sum{ |ing| ing.grams}
 
     puts "RECIPE: #{self.name}  |  SERVINGS: #{self.servings}"
     puts "                                                             "
     puts "RECIPE TOTAL NUTRIENTS:"
-    totals.map { |nutrient, value| puts "#{nutrient}: #{value}" } 
+    totals.map do |nutrient, value| 
+      puts "#{nutrient}: #{value} grams" if nutrient != "calories" 
+      puts "#{nutrient}: #{value} "if nutrient === "calories" 
+    end
     puts "                                         "
     puts "NUTRIENTS PER SERVING:"
-    totals.map { |nutrient, value| puts "#{nutrient}: #{value/self.servings}"}
+    totals.map do |nutrient, value| 
+      puts "#{nutrient}: #{value/self.servings} grams" if nutrient != "calories" 
+      puts "#{nutrient}: #{value/self.servings} "if nutrient === "calories" 
+    end
     puts "                                         "
     TTY::Prompt.new.keypress("Press any key to return to main menu", timeout: 30)
   end
@@ -77,10 +84,6 @@ class Recipe < ActiveRecord::Base
     self.show_meal_name
   end
 
-  def recipes_by_meal
-    @user.recipes
-  end 
-
   def edit_recipe
     TTY::Prompt.new.select("What would you like to edit?") do |recipe|
       recipe.choice "servings: ", -> {
@@ -90,7 +93,7 @@ class Recipe < ActiveRecord::Base
       }
       recipe.choice "ingredients: ", -> { self.edit_ingredients}
       recipe.choice "name: ", ->{
-        puts "enter new recipe name"
+        puts "enter new name for your recipe"
         val = gets.chomp
         self.update(name: val)
       }
@@ -112,7 +115,8 @@ class Recipe < ActiveRecord::Base
 
   def show_ingredients
     puts "here are the ingredients for #{self.name}: "
-    self.ingredients.map {|ing| puts ing.name }
+    self.ingredients.map {|ing| puts "#{ing.name}: #{ing.grams} grams" }
+    TTY::Prompt.new.keypress("Press any key to return to main menu", timeout: 30)
   end
 
 

@@ -57,14 +57,16 @@ class User < ActiveRecord::Base
         system "clear"
         self.recipe_edit
       }
+      recipe.choice "see ingredients for recipe", -> {
+        recipe = self.choose_recipe
+        recipe.show_ingredients
+      }
       recipe.choice "delete a recipe", -> {
         system "clear"
         self.delete_recipe
       }
     end
   end
-
-  
 
   def add_recipe_to_meal
     recipe_names = self.recipes.map { |recipe| recipe.name }
