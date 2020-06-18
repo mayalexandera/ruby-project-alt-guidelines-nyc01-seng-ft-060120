@@ -89,7 +89,7 @@ class User < ActiveRecord::Base
   def delete_recipe
     recipe_names = self.recipes.map { |recipe| recipe.name }
     recipe_name = TTY::Prompt.new.enum_select("Please choose a recipe", recipe_names)
-    recipe = self.recipes.find_by(name: recipe)
+    recipe = self.recipes.find_by(name: recipe_name)
     recipe.destroy
     puts "deleted #{recipe.name}"
     TTY::Prompt.new.keypress("Press any key to return to main menu", timeout: 30)

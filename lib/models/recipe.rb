@@ -38,7 +38,6 @@ class Recipe < ActiveRecord::Base
     puts "#{to_delete.name} has been deleted!"
     TTY::Prompt.new.keypress("Press any key to continue", timeout: 30)
     self.show_ingredients
-    TTY::Prompt.new.keypress("Press any key to return to main menu", timeout: 30)
   end
 
   def nutrient_totals
