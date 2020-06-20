@@ -88,24 +88,24 @@ class User < ActiveRecord::Base
 
   def read_update_delete(choice)
     system "clear"
-    puts "RECIPE: #{choice.name}  | SERVINGS: #{choice.servings}"
-  TTY::Prompt.new.select("What would you like to do?") do |recipe|
-    recipe.choice "See nutrition information", -> {
-      choice.nutrient_totals
-    }
-    recipe.choice "edit", -> {
-      system "clear"
-      choice.edit
-    }
-    recipe.choice "see ingredients", -> {
-      choice.show_ingredients
-    }
-    recipe.choice "delete recipe", -> {
-      system "clear"
-      choice.destroy
-      puts "deleted #{choice.name}"
-    }
+    puts "RECIPE: #{choice.name}  |  SERVINGS: #{choice.servings}"
+    TTY::Prompt.new.select("What would you like to do?") do |recipe|
+      recipe.choice "See nutrition information", -> {
+        choice.nutrient_totals
+      }
+      recipe.choice "edit", -> {
+        system "clear"
+        choice.edit
+      }
+      recipe.choice "see ingredients", -> {
+        choice.show_ingredients
+      }
+      recipe.choice "delete recipe", -> {
+        system "clear"
+        choice.destroy
+        puts "deleted #{choice.name}"
+      }
+    end
   end
 end
 
-end

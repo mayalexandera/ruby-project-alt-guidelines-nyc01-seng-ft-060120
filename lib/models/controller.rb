@@ -42,15 +42,18 @@ class Controller
   end
 
   def see_all_recipes
-    system "clear"
-    puts "#{@user.name}, you have no recipes" if @user.recipes.count == 0
+    self.verify_recipes
     @user.all_recipes_read_update_delete if @user.recipes.count > 0
     self.enter
   end
 
-  def show_recipes_by_meal
+  def verify_recipes
     system "clear"
     puts "#{@user.name}, you have no recipes" if @user.recipes.count == 0
+  end
+
+  def show_recipes_by_meal
+    self.verify_recipes
     @user.show_recipes_by_meal
     self.enter
   end
