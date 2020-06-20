@@ -49,7 +49,7 @@ class User < ActiveRecord::Base
   end
 
   def choose_recipe
-    recipe = TTY::Prompt.new.enum_select("Please  choose a recipe", self.list_recipes)
+    recipe = TTY::Prompt.new.enum_select("Please choose a recipe", self.list_recipes)
     self.recipes.find_by(name: recipe)
   end
 
@@ -80,13 +80,10 @@ class User < ActiveRecord::Base
     RecipeMeal.connect_rms(name, meals, self)
   end
     
-    
-
   def show_recipes_by_meal
     meals = self.meals.map { |meal| meal.name }.uniq
     choice = TTY::Prompt.new.enum_select("Please choose a meal category", meals)
     self.meals_by_name(choice)
-
   end
 
   def read_update_delete(choice)

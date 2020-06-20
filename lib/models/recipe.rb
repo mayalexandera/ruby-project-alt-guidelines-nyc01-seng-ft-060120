@@ -132,8 +132,5 @@ class Recipe < ActiveRecord::Base
     puts "here are the ingredients for #{self.name}: "
     self.ingredients.map {|ing| puts "#{ing.name}: #{ing.grams} grams" }
   end
-
-  
-
 end
 

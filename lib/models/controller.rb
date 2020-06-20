@@ -42,27 +42,21 @@ class Controller
   end
 
   def see_all_recipes
-    if @user.recipes.count == 0
-      TTY::Prompt.new.keypress("you have no recipes, press any key to continue", timeout: 30)
-    else
-      @user.all_recipes_read_update_delete
-    end
+    system "clear"
+    puts "#{@user.name}, you have no recipes" if @user.recipes.count == 0
+    @user.all_recipes_read_update_delete if @user.recipes.count > 0
     self.enter
   end
 
   def show_recipes_by_meal
-    if @user.recipes.count == 0
-      TTY::Prompt.new.keypress("you have no recipes, press any key to continue", timeout: 30)
-    else
-      @user.show_recipes_by_meal
-    end
+    system "clear"
+    puts "#{@user.name}, you have no recipes" if @user.recipes.count == 0
+    @user.show_recipes_by_meal
     self.enter
   end
 
- 
-
   def enter
-    TTY::Prompt.new.keypress("press any key to continue", timeout:  30)
+    TTY::Prompt.new.keypress("press any key to return to main menu", timeout:  30)
     self.main_menu
   end
 end
