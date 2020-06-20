@@ -44,7 +44,7 @@ class User < ActiveRecord::Base
     recipe_input.add_recipe_to_meal
   end
 
-  def list_recipes
+  def list_recipes(recipes=self.recipes)
     recipes.map { |recipe| recipe.name }
   end
 
@@ -77,20 +77,16 @@ class User < ActiveRecord::Base
 
   def meals_by_name(name)
     meals = self.meals.find_all{ |meal| meal.name == name }
-    rms_by_meal_ids = RecipeMeal.connect_rms(meals)
-    recipes = self.recipes.where(:id => rms_by_meal_ids)
-    puts "Here are all your #{name} recipes"
-    names = recipes.map { |recipe| recipe.name }
-    choice = TTY::Prompt.new.enum_select("Select a recipe", names)
-    rec = self.recipes.find_by(name: choice)
-    self.read_update_delete(rec)
+    RecipeMeal.connect_rms(name, meals, self)
   end
+    
+    
 
   def show_recipes_by_meal
     meals = self.meals.map { |meal| meal.name }.uniq
     choice = TTY::Prompt.new.enum_select("Please choose a meal category", meals)
     self.meals_by_name(choice)
-    
+
   end
 
   def read_update_delete(choice)
