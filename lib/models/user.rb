@@ -42,12 +42,10 @@ class User < ActiveRecord::Base
     username = gets.chomp
     self.update(name: username)
     puts "your username is now #{username}"
-    TTY::Prompt.new.keypress("Press any key to return to main menu", timeout: 30)
   end
 
-  def show_recipes_by_name
-    self.recipes.map { |recipe| puts recipe.name }
-
+  def recipes_read_edit_delete
+    self.list_recipes
     TTY::Prompt.new.select("What would you like to do?") do |recipe|
       recipe.choice "See nutrient totals for a recipe", -> {
         recipe = self.choose_recipe
@@ -68,17 +66,18 @@ class User < ActiveRecord::Base
     end
   end
 
+  def list_recipes
+    return recipes.map{ |recipe| recipe.name } 
+  end
+
   def add_recipe_to_meal
-    recipe_names = self.recipes.map { |recipe| recipe.name }
-    recipe = TTY::Prompt.new.enum_select("Please choose a recipe", recipe_names)
-    recipe1 = self.recipes.find_by(name: recipe)
+    recipe1 = self.choose_recipe
     recipe1.add_recipe_to_meal
   end
 
   def choose_recipe
-    recipe_names = self.recipes.map { |recipe| recipe.name }
-    recipe = TTY::Prompt.new.enum_select("Please choose a recipe", recipe_names)
-    recipe1 = self.recipes.find_by(name: recipe)
+    recipe = TTY::Prompt.new.enum_select("Please choose a recipe", self.list_recipes)
+    self.recipes.find_by(name: recipe)
   end
 
   def recipe_edit
@@ -87,11 +86,8 @@ class User < ActiveRecord::Base
   end
 
   def delete_recipe
-    recipe_names = self.recipes.map { |recipe| recipe.name }
-    recipe_name = TTY::Prompt.new.enum_select("Please choose a recipe", recipe_names)
-    recipe = self.recipes.find_by(name: recipe_name)
+    recipe = self.choose_recipe
     recipe.destroy
     puts "deleted #{recipe.name}"
-    TTY::Prompt.new.keypress("Press any key to return to main menu", timeout: 30)
   end
 end

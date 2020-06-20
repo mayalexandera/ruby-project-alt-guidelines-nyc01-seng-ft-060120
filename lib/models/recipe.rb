@@ -16,28 +16,42 @@ class Recipe < ActiveRecord::Base
     restClientResponseObject = RestClient.get(url)
     jsonButItsAString = restClientResponseObject.body
     workable_hash = JSON.parse(jsonButItsAString)
-    nutrients1 = workable_hash["parsed"][0]["food"]["nutrients"]
+    nutrient_response = workable_hash["parsed"][0]["food"]["nutrients"]
 
     puts "How many grams does your recipe call for?"
     grams = gets.chomp.to_f
 
-    calc_nutrients1 = nutrients1.transform_values{ |v| (v * (grams/100)).round(2) }
-    calc_ingredient1 = Ingredient.create(name: ingredient1, recipe_id: self.id, grams: grams, calories: calc_nutrients1["ENERC_KCAL"], protein: calc_nutrients1["PROCNT"], fat: calc_nutrients1["FAT"], carbs: calc_nutrients1["CHOCDF"])
- 
+    nutrients = self.calculate_nutrients(nutrient_response, grams)
+    self.calculate_ingredient(ingredient1, nutrients, grams)
+
     TTY::Prompt.new.select("what would you like to do?") do |recipe|
       recipe.choice "Add another ingredient", -> {self.add_ingredient_to_recipe}
       recipe.choice "See nutrient totals for recipe", -> {self.nutrient_totals}
     end
   end
 
+  def calculate_nutrients(nutrient_response, grams)
+    nutrient_response.transform_values{ |v| (v * (grams/100)).round(2) }
+  end
+
+  def calculate_ingredient(name, nutrients, grams)
+    Ingredient.create(name: name, recipe_id: self.id, grams: grams, calories: nutrients["ENERC_KCAL"], protein: nutrients["PROCNT"], fat: nutrients["FAT"], carbs: nutrients["CHOCDF"])
+  end
+
   def delete_ingredient
-    ingredient_names = self.ingredients.map{ |ing| ing.name }
-    ing_name = TTY::Prompt.new.enum_select("select an ingredient to delete", ingredient_names)
-    to_delete = self.ingredients.find_by(name: ing_name)
+    to_delete = self.choose_ingredient
     self.ingredients.destroy(to_delete)
     puts "#{to_delete.name} has been deleted!"
-    TTY::Prompt.new.keypress("Press any key to continue", timeout: 30)
     self.show_ingredients
+  end
+
+  def list_ingredients
+    self.ingredients.map{ |ing| ing.name }
+  end
+
+  def choose_ingredient
+    ing_names = self.list_ingredients
+    TTY::Prompt.new.enum_select("select an ingredient", ing_names)
   end
 
   def nutrient_totals
@@ -62,7 +76,6 @@ class Recipe < ActiveRecord::Base
       puts "#{nutrient}: #{value/self.servings} "if nutrient === "calories" 
     end
     puts "                                         "
-    TTY::Prompt.new.keypress("Press any key to return to main menu", timeout: 30)
   end
 
   def add_recipe_to_meal
@@ -89,12 +102,14 @@ class Recipe < ActiveRecord::Base
         puts "enter new value for servings"
         val = gets.chomp
         self.update(servings: val)
+        self.nutrient_totals
       }
       recipe.choice "ingredients: ", -> { self.edit_ingredients}
       recipe.choice "name: ", ->{
         puts "enter new name for your recipe"
         val = gets.chomp
         self.update(name: val)
+        "recipe name changed to #{self.name}"
       }
     end
   end
@@ -115,8 +130,8 @@ class Recipe < ActiveRecord::Base
   def show_ingredients
     puts "here are the ingredients for #{self.name}: "
     self.ingredients.map {|ing| puts "#{ing.name}: #{ing.grams} grams" }
-    TTY::Prompt.new.keypress("Press any key to return to main menu", timeout: 30)
   end
+
 
 
 end
