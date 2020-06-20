@@ -28,6 +28,13 @@ class User < ActiveRecord::Base
     end
   end
 
+  def update_username
+    puts "Please enter your new username"
+    username = gets.chomp
+    self.update(name: username)
+    puts "your username is now #{username}"
+  end
+
   def create_recipe
     puts "Enter a name for a recipe"
     recipe_name = gets.chomp
@@ -37,52 +44,18 @@ class User < ActiveRecord::Base
     recipe_input.add_recipe_to_meal
   end
 
-  def update_username
-    puts "Please enter your new username"
-    username = gets.chomp
-    self.update(name: username)
-    puts "your username is now #{username}"
-  end
-
-  def recipes_read_edit_delete
-    self.list_recipes
-    TTY::Prompt.new.select("What would you like to do?") do |recipe|
-      recipe.choice "See nutrient totals for a recipe", -> {
-        recipe = self.choose_recipe
-        recipe.nutrient_totals
-      }
-      recipe.choice "edit recipe", -> {
-        system "clear"
-        self.recipe_edit
-      }
-      recipe.choice "see ingredients for recipe", -> {
-        recipe = self.choose_recipe
-        recipe.show_ingredients
-      }
-      recipe.choice "delete a recipe", -> {
-        system "clear"
-        self.delete_recipe
-      }
-    end
-  end
-
   def list_recipes
-    return recipes.map{ |recipe| recipe.name } 
-  end
-
-  def add_recipe_to_meal
-    recipe1 = self.choose_recipe
-    recipe1.add_recipe_to_meal
+    recipes.map { |recipe| recipe.name }
   end
 
   def choose_recipe
-    recipe = TTY::Prompt.new.enum_select("Please choose a recipe", self.list_recipes)
+    recipe = TTY::Prompt.new.enum_select("Please  choose a recipe", self.list_recipes)
     self.recipes.find_by(name: recipe)
   end
 
-  def recipe_edit
+  def edit_recipe
     choice = self.choose_recipe
-    choice.edit_recipe
+    choice.edit
   end
 
   def delete_recipe
@@ -90,4 +63,56 @@ class User < ActiveRecord::Base
     recipe.destroy
     puts "deleted #{recipe.name}"
   end
+
+  def all_recipes_read_update_delete
+    system "clear"
+    choice = self.choose_recipe
+    self.read_update_delete(choice)
+  end
+
+  def add_recipe_to_meal
+    recipe1 = self.choose_recipe
+    recipe1.add_recipe_to_meal
+  end
+
+  def meals_by_name(name)
+    meals = self.meals.find_all{ |meal| meal.name == name }
+    rms_by_meal_ids = RecipeMeal.connect_rms(meals)
+    recipes = self.recipes.where(:id => rms_by_meal_ids)
+    puts "Here are all your #{name} recipes"
+    names = recipes.map { |recipe| recipe.name }
+    choice = TTY::Prompt.new.enum_select("Select a recipe", names)
+    rec = self.recipes.find_by(name: choice)
+    self.read_update_delete(rec)
+  end
+
+  def show_recipes_by_meal
+    meals = self.meals.map { |meal| meal.name }.uniq
+    choice = TTY::Prompt.new.enum_select("Please choose a meal category", meals)
+    self.meals_by_name(choice)
+    
+  end
+
+  def read_update_delete(choice)
+    system "clear"
+    puts "RECIPE: #{choice.name}  | SERVINGS: #{choice.servings}"
+  TTY::Prompt.new.select("What would you like to do?") do |recipe|
+    recipe.choice "See nutrition information", -> {
+      choice.nutrient_totals
+    }
+    recipe.choice "edit", -> {
+      system "clear"
+      choice.edit
+    }
+    recipe.choice "see ingredients", -> {
+      choice.show_ingredients
+    }
+    recipe.choice "delete recipe", -> {
+      system "clear"
+      choice.destroy
+      puts "deleted #{choice.name}"
+    }
+  end
+end
+
 end

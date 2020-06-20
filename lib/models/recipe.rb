@@ -55,6 +55,7 @@ class Recipe < ActiveRecord::Base
   end
 
   def nutrient_totals
+    system "clear"
     totals = {}
     totals["calories"] = self.ingredients.sum{ |ing| ing.calories}
     totals["protein"] = self.ingredients.sum{ |ing| ing.protein}
@@ -96,7 +97,7 @@ class Recipe < ActiveRecord::Base
     self.show_meal_name
   end
 
-  def edit_recipe
+  def edit
     TTY::Prompt.new.select("What would you like to edit?") do |recipe|
       recipe.choice "servings: ", -> {
         puts "enter new value for servings"
@@ -132,7 +133,7 @@ class Recipe < ActiveRecord::Base
     self.ingredients.map {|ing| puts "#{ing.name}: #{ing.grams} grams" }
   end
 
-
+  
 
 end
 
